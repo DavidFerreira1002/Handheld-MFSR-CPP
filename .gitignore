@@ -1,0 +1,3 @@
+build/*
+.handheld_venv/*
+tests/data/*
