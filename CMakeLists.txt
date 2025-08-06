@@ -24,6 +24,7 @@ add_library(handheld_lib
     src/GreyConverter.cu
     src/GaussianKernel1D.cpp
     src/Pyramid.cu
+    src/PyramidDecimate.cu
     src/BlockMatcher.cu
     # Add any other .cpp files you want shared between main and tests
 )

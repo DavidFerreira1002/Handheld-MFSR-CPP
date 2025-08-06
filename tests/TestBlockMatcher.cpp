@@ -37,9 +37,9 @@ int main(){
 
     // build pyramids
     PyramidParams pp{{1,2,4},0.5f};
-    auto refP = buildGaussianPyramid(d_ref.data().get(),H,W,pp);
+    auto refP = buildDecimationPyramid(d_ref.data().get(),H,W,pp.factors);
     std::vector<std::vector<thrust::device_vector<float>>> comps(1);
-    comps[0] = buildGaussianPyramid(d_comp.data().get(),H,W,pp);
+    comps[0] = buildDecimationPyramid(d_comp.data().get(),H,W,pp.factors);
 
     // BlockMatcher params
     BlockMatchingParams bmp{{1,2,4},{2,2,2},{1,1,1},{"L1","L1","L1"}};
@@ -55,6 +55,20 @@ int main(){
                     size_t(0)*tilesY*tilesX;          // levels 0,1 skipped
     // copy back to host
     thrust::host_vector<int2> hshifts = shifts;
+
+    // Debug dump
+    std::cerr << "Finest‐level shifts (ty,tx) → (x,y):\n";
+    for(int ty=0; ty<tilesY; ++ty){
+      for(int tx=0; tx<tilesX; ++tx){
+        int idx = offset + ty*tilesX + tx;
+        auto s = hshifts[idx];
+        std::cerr << "(" << ty << "," << tx << ")="
+                  << "(" << s.x << "," << s.y << ")  ";
+      }
+      std::cerr << "\n";
+    }
+    std::cerr << "Now testing expectation...\n";
+
     for(int ty=0; ty<tilesY; ++ty){
       for(int tx=0; tx<tilesX; ++tx){
         int2 s = hshifts[offset + ty*tilesX + tx];
