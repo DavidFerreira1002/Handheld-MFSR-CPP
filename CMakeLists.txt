@@ -19,8 +19,20 @@ set(CNPY_LIBRARY /usr/local/lib/libcnpy.a)
 
 add_library(handheld_lib
     src/Burst.cpp
+    src/NoiseModel.cpp
+    src/SNR.cpp
+    src/GreyConverter.cu
+    src/GaussianKernel1D.cpp
+    src/Pyramid.cu
+    src/BlockMatcher.cu
     # Add any other .cpp files you want shared between main and tests
 )
+
+# Tell CMake to compile .cu with separable compilation (so symbols get emitted)
+set_target_properties(handheld_lib PROPERTIES
+    CUDA_SEPARABLE_COMPILATION ON
+)
+
 
 target_include_directories(handheld_lib PUBLIC
     ${CMAKE_SOURCE_DIR}/include
@@ -30,8 +42,10 @@ target_include_directories(handheld_lib PUBLIC
 )
 
 target_link_libraries(handheld_lib
+  PUBLIC
     ${OpenCV_LIBS}
     CUDA::cudart
+    CUDA::cufft      # in case any CUFFT calls live in the library
     ${LIBRAW_LIBRARIES}
 )
 
@@ -53,7 +67,6 @@ target_compile_options(HandheldMFSR PRIVATE
 )
 
 # Link libraries
-find_package(CUDA REQUIRED)
 target_link_libraries(HandheldMFSR PRIVATE
     ${OpenCV_LIBS}
     CUDA::cudart
