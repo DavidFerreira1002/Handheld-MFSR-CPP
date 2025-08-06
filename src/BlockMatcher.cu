@@ -190,10 +190,10 @@ thrust::device_vector<int2> BlockMatcher::match(
   for(int lv = 0; lv < L; ++lv) {
   int rev = L - 1 - lv;  // “reverse index”: lv=0→last level (coarsest), etc.
 
-  int f      = _p.factors   [lv];  // Python’s factors[lv]
-  int Ts     = _p.tileSizes [lv];
-  int rad    = _p.searchRadia[lv];
-  bool useL2 = (_p.distances[lv] == "L2");
+  int f      = _p.factors   [rev];  // Python’s factors[lv]
+  int Ts     = _p.tileSizes [rev];
+  int rad    = _p.searchRadia[rev];
+  bool useL2 = (_p.distances[rev] == "L2");
 
   int H = H0 / f, W = W0 / f;
   int tilesY = (H + Ts - 1) / Ts;
