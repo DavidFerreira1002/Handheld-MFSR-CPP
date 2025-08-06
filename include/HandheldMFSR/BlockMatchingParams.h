@@ -7,7 +7,7 @@ namespace HandheldMFSR {
 /// Mirrors Python’s params['block matching']['tuning']
 struct BlockMatchingParams {
     std::vector<int>        factors;     // e.g. {1,2,4,4}
-    std::vector<int>        tileSizes;   // same length
+    std::vector<int>        tileSizes;   // e.g. {16,8,4}
     std::vector<int>        searchRadia; // same length
     std::vector<std::string> distances;  // "L1" or "L2" per level
 };

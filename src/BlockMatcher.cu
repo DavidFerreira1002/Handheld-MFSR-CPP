@@ -119,8 +119,8 @@ void localSearchL1(
     __syncthreads();
 
     float best = FLT_MAX; int2 bestF = f;
-    for(int dx = -rad; dx <= rad; ++dx) {
-      for(int dy = -rad; dy <= rad; ++dy) {
+    for(int dy = -rad; dy <= rad; ++dy) {
+      for(int dx = -rad; dx <= rad; ++dx) {
         float cost = 0;
         int2 c = make_int2(f.x + dx, f.y + dy);
         for(int j = 0; j < tileSize; ++j)
@@ -160,8 +160,8 @@ void localSearchL2(
     __syncthreads();
 
     float best = FLT_MAX; int2 bestF = f;
-    for(int dx = -rad; dx <= rad; ++dx) {
-      for(int dy = -rad; dy <= rad; ++dy) {
+    for(int dy = -rad; dy <= rad; ++dy) {
+      for(int dx = -rad; dx <= rad; ++dx) {
         float cost = 0;
         int2 c = make_int2(f.x + dx, f.y + dy);
         for(int j = 0; j < tileSize; ++j)
@@ -188,6 +188,8 @@ thrust::device_vector<int2> BlockMatcher::match(
   thrust::device_vector<int2> alignAll, alignPrev, alignCurr;
 
   for(int lv = 0; lv < L; ++lv) {
+  // we feed buildDecimationPyramid which gave [full,half,quarter,…]
+  // so `rev` = L-1-lv maps lv=0→coarsest, lv=L-1→finest
   int rev = L - 1 - lv;  // “reverse index”: lv=0→last level (coarsest), etc.
 
   int f      = _p.factors   [rev];  // Python’s factors[lv]
@@ -206,11 +208,13 @@ thrust::device_vector<int2> BlockMatcher::match(
     // coarsest → zero
     cudaMemset(alignCurr.data().get(), 0, M*sizeof(int2));
   } else {
-    int prevF     = _p.factors   [lv-1];
-    int prevTs    = _p.tileSizes [lv-1];
+    // upsample from previous coarser
+    int prevRev   = rev+1; // because rev=L-1-lv, so prevRev=L-1-(lv-1)
+    int prevF     = _p.factors   [prevRev];
+    int prevTs    = _p.tileSizes [prevRev];
     int prevTilesY= (H0/prevF + prevTs - 1)/prevTs;
     int prevTilesX= (W0/prevF + prevTs - 1)/prevTs;
-    int upF       = prevF / f; 
+    int upF       = f/prevF; 
 
     dim3 tb(16,16), bg((tilesX+15)/16,(tilesY+15)/16);
     for(int i=0;i<N;++i){
